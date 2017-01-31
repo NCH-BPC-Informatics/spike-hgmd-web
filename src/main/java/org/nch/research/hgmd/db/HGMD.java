@@ -19,7 +19,7 @@ public class HGMD {
     @Column(name = "OMIM_ID")
     private String omimId;
     @Column(name = "Alternate_Symbol")
-    private String alternateSymbol;
+    private String alternateSymbols;
 
     public String getEntrezId() {
         return entrezId;
@@ -53,12 +53,12 @@ public class HGMD {
         this.omimId = omimId;
     }
 
-    public String getAlternateSymbol() {
-        return alternateSymbol;
+    public String getAlternateSymbols() {
+        return alternateSymbols;
     }
 
-    public void setAlternateSymbol(String alternateSymbol) {
-        this.alternateSymbol = alternateSymbol;
+    public void setAlternateSymbols(String alternateSymbols) {
+        this.alternateSymbols = alternateSymbols;
     }
 }
 

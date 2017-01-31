@@ -33,13 +33,13 @@ public class MainUI extends UI {
     HgmdRepository repo;
 
     private MTable<HGMD> list = new MTable<>(HGMD.class)
-            .withProperties("entrezId", "accession", "classification", "omimId", "alternateSymbol")
-            // .withColumnHeaders("id", "Name", "Email")
-            .setSortableProperties("entrezId", "accession", "classification", "omimId", "alternateSymbol")
+            .withProperties("entrezId", "accession", "classification", "omimId", "alternateSymbols")
+            .withColumnHeaders("Entrez ID", "Accession ID", "Classification", "OMIM ID", "Alternate Symbols")
+            .setSortableProperties("entrezId", "accession", "classification", "omimId", "alternateSymbols")
             .withFullWidth();
 
-    private TextField filterByName = new MTextField()
-            .withInputPrompt("Filter by ID");
+    private TextField filterById = new MTextField()
+            .withInputPrompt("Filter by ID/content");
     private Button addNew = new MButton(FontAwesome.PLUS, this::add);
     private Button edit = new MButton(FontAwesome.PENCIL_SQUARE_O, this::edit);
     private Button delete = new ConfirmButton(FontAwesome.TRASH_O,
@@ -55,14 +55,14 @@ public class MainUI extends UI {
         setContent(
                 new MVerticalLayout(
                         aboutBox,
-                        new MHorizontalLayout(filterByName, addNew, edit, delete),
+                        new MHorizontalLayout(filterById, addNew, edit, delete),
                         list
                 ).expand(list)
         );
         listEntities();
 
         list.addMValueChangeListener(e -> adjustActionButtonState());
-        filterByName.addTextChangeListener(e -> {
+        filterById.addTextChangeListener(e -> {
             listEntities(e.getText());
         });
     }
@@ -76,17 +76,20 @@ public class MainUI extends UI {
     static final int PAGESIZE = 45;
 
     private void listEntities() {
-        listEntities(filterByName.getValue());
+        listEntities(filterById.getValue());
     }
 
-    private void listEntities(String nameFilter) {
+    private void listEntities(String idFilter) {
         // A dead simple in memory listing would be:
         // list.setRows(repo.findAll());
 
         // But we want to support filtering, first add the % marks for SQL name query
-        String likeFilter = "%" + nameFilter + "%";
-        // list.setRows(repo.findByNameLikeIgnoreCase(likeFilter));
-        list.setRows(repo.findAll());
+        String likeFilter = "%" + idFilter + "%";
+        if(idFilter == null || idFilter.trim().isEmpty()) {
+            list.setRows(repo.findAll());
+        } else {
+            list.setRows(repo.findByIds(likeFilter));
+        }
 
         // Lazy binding for better optimized connection from the Vaadin Table to
         // Spring Repository. This approach uses less memory and database
