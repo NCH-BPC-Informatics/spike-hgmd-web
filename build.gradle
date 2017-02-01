@@ -2,13 +2,30 @@ group 'org.nch.research'
 version '1.0-SNAPSHOT'
 
 buildscript {
+    ext {
+        gradleVaadinPluginVersion = '1.1.2'
+        springBootVersion = '1.4.4.RELEASE'
+        springLoadedVersion = '1.2.6.RELEASE'
+    }
     repositories {
         jcenter()
         mavenCentral()
     }
     dependencies {
-        classpath("org.springframework.boot:spring-boot-gradle-plugin:1.5.0.RELEASE")
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:$springBootVersion")
         classpath('se.transmode.gradle:gradle-docker:1.2')
+    }
+}
+
+ext {
+    ext {
+        // groovyVersion = '2.4.8'
+        gradleWrapperVersion = '3.3'
+        // vaadinVersion = '7.7.6'
+        vaadinSpringVersion = '1.1.1'
+        viritinVersion = '1.61'
+        // codenarcVersion = '0.25.1'
+        // spockVersion = '1.0-groovy-2.4'
     }
 }
 
@@ -25,9 +42,9 @@ jar {
 
 repositories {
     mavenCentral()
+    maven { url "http://maven.vaadin.com/vaadin-addons" }
     maven { url "https://repository.jboss.org/nexus/content/repositories/releases" }
     maven { url "http://oss.sonatype.org/content/repositories/vaadin-snapshots/" }
-    maven { url "http://maven.vaadin.com/vaadin-addons" }
 }
 
 sourceCompatibility = 1.8
@@ -40,23 +57,27 @@ dependencyManagement {
 }
 
 dependencies {
-    compile("org.springframework.boot:spring-boot-starter-data-jpa")
-    compile("com.vaadin:vaadin-spring-boot-starter:1.1.1")
-    compile("org.vaadin:viritin:1.61")
+    compile("org.springframework.boot:spring-boot-starter-data-jpa:1.4.1.RELEASE")
+    compile("org.springframework.boot:spring-boot-starter-web:1.4.1.RELEASE")
+    compile("org.springframework.boot:spring-boot-starter-tomcat:1.4.1.RELEASE")
+    compile("com.vaadin:vaadin-spring-boot-starter:${vaadinSpringVersion}")
+    compile("org.vaadin:viritin:${viritinVersion}")
+    // compile("org.vaadin:viritin:${viritinVersion}") { exclude group: 'com.vaadin' }
     // compile("com.h2database:h2")
     compile('mysql:mysql-connector-java:5.1.40')
     testCompile("junit:junit")
-    testCompile("org.springframework.boot:spring-boot-starter-test")
+    testCompile("org.springframework.boot:spring-boot-starter-test:1.4.1.RELEASE")
+}
+
+task wrapper(type: Wrapper) {
+    gradleVersion = gradleWrapperVersion
 }
 
 task buildDocker(type: Docker, dependsOn: build) {
-    push = false
+    dependsOn build
     applicationName = jar.baseName
-    dockerfile = file('src/main/docker/Dockerfile')
-    doFirst {
-        copy {
-            from jar
-            into stageDir
-        }
-    }
+    addFile jar.archivePath, "/app.jar"
+    // entryPoint(['sh', '-c', 'java -Dspring.profiles.active=$SPRING_PROFILES_ACTIVE -DlogEnvironment=$LOG_ENVIRONMENT -jar /app.jar' ])
+    entryPoint(['sh', '-c', 'java -jar /app.jar' ])
+    exposePort 8080
 }

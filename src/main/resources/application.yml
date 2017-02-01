@@ -5,7 +5,8 @@ spring:
             ddl-auto: validate
 
     datasource:
-        url: jdbc:mysql://192.168.2.46:8306/hgmd
+#        url: jdbc:mysql://192.168.2.46:8306/hgmd
+        url: jdbc:mysql://res-bpci-docker-dev-01.columbuschildrens.net:8306/hgmd
         username: root
         password: hgmdp@ss
         driver-class-name: com.mysql.jdbc.Driver

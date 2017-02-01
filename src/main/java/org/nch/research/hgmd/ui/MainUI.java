@@ -9,11 +9,8 @@ import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.UI;
-import org.nch.research.hgmd.db.HGMD;
+import org.nch.research.hgmd.db.HGMDGene;
 import org.nch.research.hgmd.db.HgmdRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
 import org.vaadin.viritin.button.ConfirmButton;
 import org.vaadin.viritin.button.MButton;
 import org.vaadin.viritin.components.DisclosurePanel;
@@ -32,10 +29,9 @@ public class MainUI extends UI {
 
     HgmdRepository repo;
 
-    private MTable<HGMD> list = new MTable<>(HGMD.class)
-            .withProperties("entrezId", "accession", "classification", "omimId", "alternateSymbols")
-            .withColumnHeaders("Entrez ID", "Accession ID", "Classification", "OMIM ID", "Alternate Symbols")
-            .setSortableProperties("entrezId", "accession", "classification", "omimId", "alternateSymbols")
+    private MTable<HGMDGene> list = new MTable<>(HGMDGene.class)
+            .withProperties("geneSymbol", "Gene_Name", "entrezId", "omimId", "alternateSymbols", "Number_of_Reported_Mutations", "Number_of_variants_avail")
+            .withColumnHeaders("Gene Symbol", "Gene Name", "Entrez ID", "OMIM ID", "Alternate Symbols", "# mutations", "# variants in dataset")
             .withFullWidth();
 
     private TextField filterById = new MTextField()
@@ -85,32 +81,32 @@ public class MainUI extends UI {
 
         // But we want to support filtering, first add the % marks for SQL name query
         String likeFilter = "%" + idFilter + "%";
-        if(idFilter == null || idFilter.trim().isEmpty()) {
-            list.setRows(repo.findAll());
+        if(idFilter != null && idFilter.length() > 1) {
+            /*
+//         Lazy binding for better optimized connection from the Vaadin Table to
+//         Spring Repository. This approach uses less memory and database
+//         resources. Use this approach if you expect you'll have lots of data
+//         in your table. There are simpler APIs if you don't need sorting.
+            list.lazyLoadFrom(
+                    // entity fetching strategy
+                    (firstRow, asc, sortProperty) -> repo.findByIds(
+                            idFilter,
+                            new PageRequest(
+                                    firstRow / PAGESIZE,
+                                    PAGESIZE,
+                                    asc ? Sort.Direction.ASC : Sort.Direction.DESC,
+                                    // fall back to id as "natural order"
+                                    sortProperty == null ? "Gene_Symbol" : sortProperty
+                            )
+                    ),
+                    // count fetching strategy
+                    () -> (int) repo.countByIds(likeFilter),
+                    PAGESIZE
+            ); */
+            list.setRows(repo.findByIdsOrderByGeneSymbol(likeFilter));
         } else {
-            list.setRows(repo.findByIds(likeFilter));
+            list.setRows(repo.findAllByOrderByGeneSymbol());
         }
-
-        // Lazy binding for better optimized connection from the Vaadin Table to
-        // Spring Repository. This approach uses less memory and database
-        // resources. Use this approach if you expect you'll have lots of data
-        // in your table. There are simpler APIs if you don't need sorting.
-        // list.lazyLoadFrom(
-        //         // entity fetching strategy
-        //         (firstRow, asc, sortProperty) -> repo.findByNameLikeIgnoreCase(
-        //                 likeFilter,
-        //                 new PageRequest(
-        //                         firstRow / PAGESIZE,
-        //                         PAGESIZE,
-        //                         asc ? Sort.Direction.ASC : Sort.Direction.DESC,
-        //                         // fall back to id as "natural order"
-        //                         sortProperty == null ? "id" : sortProperty
-        //                 )
-        //         ),
-        //         // count fetching strategy
-        //         () -> (int) repo.countByNameLike(likeFilter),
-        //         PAGESIZE
-        // );
         adjustActionButtonState();
 
     }
@@ -129,7 +125,7 @@ public class MainUI extends UI {
 //        listEntities();
     }
 
-    protected void edit(final HGMD record) {
+    protected void edit(final HGMDGene record) {
 //        personForm.setEntity(phoneBookEntry);
 //        personForm.openInModalPopup();
     }

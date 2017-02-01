@@ -1,17 +1,28 @@
 package org.nch.research.hgmd;
 
+import com.vaadin.spring.server.SpringVaadinServlet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.builder.SpringApplicationBuilder;
+import org.springframework.boot.web.servlet.ServletRegistrationBean;
+import org.springframework.context.annotation.Bean;
 
 @SpringBootApplication
 public class Application {
 
     private static final Logger log = LoggerFactory.getLogger(Application.class);
 
+    @Bean
+    public ServletRegistrationBean servletRegistrationBean() {
+        final ServletRegistrationBean servletRegistrationBean
+                = new ServletRegistrationBean( new SpringVaadinServlet(),"/*", "/VAADIN/*");
+        return servletRegistrationBean;
+    }
+
     public static void main(String[] args) {
-        SpringApplication.run(Application.class);
+        new SpringApplicationBuilder(Application.class).web(true).run(args);
     }
 
     /*
