@@ -5,19 +5,19 @@ import com.vaadin.annotations.Title;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.spring.annotation.SpringUI;
-import com.vaadin.ui.Button;
+import com.vaadin.ui.*;
 import com.vaadin.ui.Button.ClickEvent;
-import com.vaadin.ui.TextField;
-import com.vaadin.ui.UI;
+import com.vaadin.ui.themes.ValoTheme;
 import org.nch.research.hgmd.db.HGMDGene;
-import org.nch.research.hgmd.db.HgmdRepository;
+import org.nch.research.hgmd.db.HGMDGeneRepository;
+import org.nch.research.hgmd.db.HGMDVariant;
+import org.nch.research.hgmd.db.HGMDVariantRepository;
 import org.vaadin.viritin.button.ConfirmButton;
 import org.vaadin.viritin.button.MButton;
 import org.vaadin.viritin.components.DisclosurePanel;
 import org.vaadin.viritin.fields.MTable;
 import org.vaadin.viritin.fields.MTextField;
 import org.vaadin.viritin.label.RichText;
-import org.vaadin.viritin.layouts.MHorizontalLayout;
 import org.vaadin.viritin.layouts.MVerticalLayout;
 
 @Title("HGMD Search")
@@ -27,11 +27,21 @@ public class MainUI extends UI {
 
     private static final long serialVersionUID = 1L;
 
-    HgmdRepository repo;
+    HGMDGeneRepository repo;
+    HGMDVariantRepository variantRepository;
 
     private MTable<HGMDGene> list = new MTable<>(HGMDGene.class)
             .withProperties("geneSymbol", "Gene_Name", "entrezId", "omimId", "alternateSymbols", "Number_of_Reported_Mutations", "Number_of_variants_avail")
             .withColumnHeaders("Gene Symbol", "Gene Name", "Entrez ID", "OMIM ID", "Alternate Symbols", "# mutations", "# variants in dataset")
+            .withStyleName(ValoTheme.TABLE_SMALL)
+            .withStyleName(ValoTheme.TABLE_COMPACT)
+            .withFullWidth();
+
+    private MTable<HGMDVariant> variantList = new MTable<>(HGMDVariant.class)
+            .withProperties("geneSymbol", "dnaChange")
+            .withColumnHeaders("Gene Symbol", "DNA Change")
+            .withStyleName(ValoTheme.TABLE_SMALL)
+            .withStyleName(ValoTheme.TABLE_COMPACT)
             .withFullWidth();
 
     private TextField filterById = new MTextField()
@@ -41,21 +51,32 @@ public class MainUI extends UI {
     private Button delete = new ConfirmButton(FontAwesome.TRASH_O,
             "Are you sure you want to delete the entry?", this::remove);
 
-    public MainUI(HgmdRepository r) {
+    public MainUI(HGMDGeneRepository r, HGMDVariantRepository vr) {
         this.repo = r;
+        this.variantRepository = vr;
     }
 
     @Override
     protected void init(VaadinRequest request) {
-        DisclosurePanel aboutBox = new DisclosurePanel("HGMD Search Utility", new RichText().withMarkDown("Hi!")); // .withMarkDownResource("/welcome.md"));
-        setContent(
-                new MVerticalLayout(
-                        aboutBox,
-                        new MHorizontalLayout(filterById, addNew, edit, delete),
-                        list
-                ).expand(list)
+        // DisclosurePanel aboutBox = new DisclosurePanel("HGMD Search Utility", new RichText().withMarkDown("Hi!")); // .withMarkDownResource("/welcome.md"));
+        DisclosurePanel testBox = new DisclosurePanel("Test", new RichText().withContent("HAHAHA!"));
+        MVerticalLayout geneSearchLayout = new MVerticalLayout(
+                // aboutBox,
+                // new MHorizontalLayout(filterById, addNew, edit, delete),
+                filterById,
+                list
         );
+        Panel geneListPanel = new Panel("HGMD Gene Search");
+        geneListPanel.setContent(geneSearchLayout);
+        Panel variantListPanel = new Panel("HGMD Variant List");
+        variantListPanel.setContent(variantList);
+        VerticalLayout panelLayout = new VerticalLayout(geneListPanel, variantListPanel);
+        setContent(panelLayout);
+        // setContent(geneSearchLayout.expand(list));
+
         listEntities();
+        variantList.setRows(variantRepository.findAll());
+
 
         list.addMValueChangeListener(e -> adjustActionButtonState());
         filterById.addTextChangeListener(e -> {

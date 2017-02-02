@@ -7,7 +7,7 @@ import java.util.List;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-public interface HgmdRepository extends JpaRepository<HGMDGene, String> {
+public interface HGMDGeneRepository extends JpaRepository<HGMDGene, String> {
     @Query(value = "select h from HGMDGene h where " +
             "h.entrezId like :id or " +
             "h.omimId like :id or " +
