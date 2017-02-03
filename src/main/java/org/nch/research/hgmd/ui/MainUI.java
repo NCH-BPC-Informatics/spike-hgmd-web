@@ -3,6 +3,7 @@ package org.nch.research.hgmd.ui;
 import com.vaadin.annotations.Theme;
 import com.vaadin.annotations.Title;
 import com.vaadin.server.FontAwesome;
+import com.vaadin.server.Page;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.spring.annotation.SpringUI;
 import com.vaadin.ui.*;
@@ -20,6 +21,10 @@ import org.vaadin.viritin.fields.MTextField;
 import org.vaadin.viritin.label.RichText;
 import org.vaadin.viritin.layouts.MVerticalLayout;
 
+import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.List;
+
 @Title("HGMD Search")
 @Theme("valo")
 @SpringUI
@@ -29,7 +34,8 @@ public class MainUI extends UI {
 
     HGMDGeneRepository repo;
     HGMDVariantRepository variantRepository;
-
+    private Panel variantListPanel = new Panel("HGMD Variant List");
+    Panel geneListPanel = new Panel("HGMD Gene Search");
     private MTable<HGMDGene> list = new MTable<>(HGMDGene.class)
             .withProperties("geneSymbol", "Gene_Name", "entrezId", "omimId", "alternateSymbols", "Number_of_Reported_Mutations", "Number_of_variants_avail")
             .withColumnHeaders("Gene Symbol", "Gene Name", "Entrez ID", "OMIM ID", "Alternate Symbols", "# mutations", "# variants in dataset")
@@ -38,8 +44,8 @@ public class MainUI extends UI {
             .withFullWidth();
 
     private MTable<HGMDVariant> variantList = new MTable<>(HGMDVariant.class)
-            .withProperties("geneSymbol", "dnaChange")
-            .withColumnHeaders("Gene Symbol", "DNA Change")
+            .withProperties("geneSymbol", "dnaChange", "dbSnp", "proteinChange", "weight")
+            .withColumnHeaders("Gene Symbol", "DNA Change", "dbSNP", "Protein Change", "Weight")
             .withStyleName(ValoTheme.TABLE_SMALL)
             .withStyleName(ValoTheme.TABLE_COMPACT)
             .withFullWidth();
@@ -50,6 +56,7 @@ public class MainUI extends UI {
     private Button edit = new MButton(FontAwesome.PENCIL_SQUARE_O, this::edit);
     private Button delete = new ConfirmButton(FontAwesome.TRASH_O,
             "Are you sure you want to delete the entry?", this::remove);
+    private VerticalLayout panelLayout;
 
     public MainUI(HGMDGeneRepository r, HGMDVariantRepository vr) {
         this.repo = r;
@@ -58,28 +65,43 @@ public class MainUI extends UI {
 
     @Override
     protected void init(VaadinRequest request) {
-        // DisclosurePanel aboutBox = new DisclosurePanel("HGMD Search Utility", new RichText().withMarkDown("Hi!")); // .withMarkDownResource("/welcome.md"));
-        DisclosurePanel testBox = new DisclosurePanel("Test", new RichText().withContent("HAHAHA!"));
+        /*
+        Page.Styles styles = Page.getCurrent().getStyles();
+        styles.add(".v-panel-caption-caption-green .v-caption { " +
+                "    color: #FFFFFF; " +
+                "    background-color: #4CAF50; " +
+                "}");
+        styles.add(".v-panel-caption-caption-blue .v-caption { " +
+                "    color: #FFFFFF; " +
+                "    background-color: darkblue; " +
+                "}");
+        variantListPanel.addStyleName("caption-green");
+        */
+        MVerticalLayout variantListLayout = new MVerticalLayout(variantList);
+        variantListPanel.setContent(variantListLayout);
+
+        list.addRowClickListener(this::rowSelected);
         MVerticalLayout geneSearchLayout = new MVerticalLayout(
                 // aboutBox,
                 // new MHorizontalLayout(filterById, addNew, edit, delete),
                 filterById,
                 list
         );
-        Panel geneListPanel = new Panel("HGMD Gene Search");
+
+        geneListPanel.addStyleName("caption-blue");
         geneListPanel.setContent(geneSearchLayout);
-        Panel variantListPanel = new Panel("HGMD Variant List");
-        variantListPanel.setContent(variantList);
-        VerticalLayout panelLayout = new VerticalLayout(geneListPanel, variantListPanel);
+
+        panelLayout = new VerticalLayout(geneListPanel, variantListPanel);
         setContent(panelLayout);
         // setContent(geneSearchLayout.expand(list));
 
         listEntities();
-        variantList.setRows(variantRepository.findAll());
+
 
 
         list.addMValueChangeListener(e -> adjustActionButtonState());
         filterById.addTextChangeListener(e -> {
+            variantList.setRows(new ArrayList<HGMDVariant>());
             listEntities(e.getText());
         });
     }
@@ -101,7 +123,7 @@ public class MainUI extends UI {
         // list.setRows(repo.findAll());
 
         // But we want to support filtering, first add the % marks for SQL name query
-        String likeFilter = "%" + idFilter + "%";
+        String likeFilter = "%" + idFilter.toUpperCase() + "%";
         if(idFilter != null && idFilter.length() > 1) {
             /*
 //         Lazy binding for better optimized connection from the Vaadin Table to
@@ -130,6 +152,16 @@ public class MainUI extends UI {
         }
         adjustActionButtonState();
 
+    }
+
+    public void rowSelected(MTable.RowClickEvent clickEvent) {
+        HGMDGene row = (HGMDGene) clickEvent.getRow();
+        if( row != null ) {
+            String geneSymbol = row.getGeneSymbol();
+            List<HGMDVariant> rows = variantRepository.findById(geneSymbol);
+            variantListPanel.setCaption(MessageFormat.format("HGMD Variant List <i>({0} variant(s))</i>", rows.size()));
+            variantList.setRows(rows);
+        }
     }
 
     public void add(ClickEvent clickEvent) {

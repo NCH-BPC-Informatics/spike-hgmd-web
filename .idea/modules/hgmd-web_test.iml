@@ -15,7 +15,7 @@
     <orderEntry type="library" name="Gradle: org.springframework.boot:spring-boot-starter-tomcat:1.4.1.RELEASE" level="project" />
     <orderEntry type="library" name="Gradle: com.vaadin:vaadin-spring-boot-starter:1.1.1" level="project" />
     <orderEntry type="library" name="Gradle: org.vaadin:viritin:1.61" level="project" />
-    <orderEntry type="library" name="Gradle: mysql:mysql-connector-java:5.1.40" level="project" />
+    <orderEntry type="library" name="Gradle: com.h2database:h2:1.4.193" level="project" />
     <orderEntry type="library" name="Gradle: junit:junit:4.12" level="project" />
     <orderEntry type="library" name="Gradle: org.springframework.boot:spring-boot-starter-test:1.4.1.RELEASE" level="project" />
     <orderEntry type="library" name="Gradle: org.springframework.boot:spring-boot-starter:1.4.4.RELEASE" level="project" />

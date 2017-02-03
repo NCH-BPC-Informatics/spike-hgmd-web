@@ -4,15 +4,16 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import java.math.BigDecimal;
 
 @Entity
-@Table(name = "hgmd_variant")
+@Table(name = "HGMD_VARIANT")
 public class HGMDVariant {
-    public Long getId() {
+    public BigDecimal getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(BigDecimal id) {
         this.id = id;
     }
 
@@ -57,16 +58,16 @@ public class HGMDVariant {
     }
 
     @Id
-    @Column(name = "id")
-    private Long id;
-    @Column(name = "Gene_Symbol")
+    @Column(name = "ID")
+    private BigDecimal id;
+    @Column(name = "GENE_SYMBOL")
     private String geneSymbol;
-    @Column(name = "DNA_change")
+    @Column(name = "DNA_CHANGE")
     private String dnaChange;
-    @Column(name = "dbSNP")
+    @Column(name = "DBSNP")
     private String dbSnp;
-    @Column(name = "Protein_Change")
+    @Column(name = "PROTEIN_CHANGE")
     private String proteinChange;
-    @Column(name = "weight")
+    @Column(name = "WEIGHT")
     private String weight;
 }

@@ -6,7 +6,7 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 
 @Entity
-@Table(name = "hgmd_gene")
+@Table(name = "\"HGMD_GENE\"")
 public class HGMDGene {
 
     public String getEntrezId() {
@@ -66,18 +66,18 @@ public class HGMDGene {
     }
 
     @Id
-    @Column(name = "Gene_Symbol")
+    @Column(name = "GENE_SYMBOL")
     private String geneSymbol;
-    @Column(name = "Entrez_ID")
+    @Column(name = "ENTREZ_ID")
     private String entrezId;
-    @Column(name = "Gene_Name")
+    @Column(name = "GENE_NAME")
     private String Gene_Name;
     @Column(name = "OMIM_ID")
     private String omimId;
-    @Column(name = "Alternate_Symbol")
+    @Column(name = "ALTERNATE_SYMBOL")
     private String alternateSymbols;
-    @Column(name = "Number_of_Reported_Mutations")
+    @Column(name = "NUMBER_OF_REPORTED_MUTATIONS")
     private Integer Number_of_Reported_Mutations;
-    @Column(name = "Number_of_variants_avail")
+    @Column(name = "NUMBER_OF_VARIANTS_AVAIL")
     private Integer Number_of_variants_avail;
 }
