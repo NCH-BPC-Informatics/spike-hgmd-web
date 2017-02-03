@@ -63,8 +63,8 @@ dependencies {
     compile("com.vaadin:vaadin-spring-boot-starter:${vaadinSpringVersion}")
     compile("org.vaadin:viritin:${viritinVersion}")
     // compile("org.vaadin:viritin:${viritinVersion}") { exclude group: 'com.vaadin' }
-    // compile("com.h2database:h2")
-    compile('mysql:mysql-connector-java:5.1.40')
+    compile("com.h2database:h2")
+    // compile('mysql:mysql-connector-java:5.1.40')
     testCompile("junit:junit")
     testCompile("org.springframework.boot:spring-boot-starter-test:1.4.1.RELEASE")
 }
